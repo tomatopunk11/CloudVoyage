@@ -38,9 +38,27 @@
 
 测试覆盖专注结算、历史分组、航线投影、地图跟随和窗口布局规则。各机型的实际排版与触控可通过真机或 Android 模拟器验证。
 
-## 可选的在线卫星图
+## 启用在线卫星图
 
-构建前设置进程级环境变量 `CLOUD_VOYAGE_MAPTILER_KEY`，应用便会请求 MapTiler 的 `satellite-v2` 瓦片。MapTiler 控制台中的 Allowed user-agent header 可填 `CloudVoyage-Android`，Allowed HTTP Origins 留空。Key 会随 APK 分发，所有安装者共用该 Key 的用量。网络不可用时，地图使用内置离线底图。 [MapTiler API Key 配置](https://docs.maptiler.com/guides/developer/credentials/api-key/)
+**开源仓库和 GitHub Releases 提供的 APK 均未附带 MapTiler API Key。** 直接安装公开 APK 可以离线使用。启用在线卫星图时，使用自己的 Key 从源码重新构建 APK，无需在手机里填写。
+
+1. 登录 [MapTiler Cloud](https://cloud.maptiler.com/)，进入 **API keys**，创建或编辑一把供云上航程使用的 Key。免费套餐的 Key 数量以控制台为准。
+2. **Name** 可填 `CloudVoyage Android`。**Allowed user-agent header** 填 `CloudVoyage-Android`（区分大小写），**Allowed HTTP Origins** 留空。保存后复制 Key。 [MapTiler API Key 配置](https://docs.maptiler.com/guides/developer/credentials/api-key/)
+3. 在仓库根目录用 PowerShell 7 运行以下命令。替换路径，按上文准备自己的签名库。提示出现时粘贴 Key，输入内容会被遮盖。
+
+   ```powershell
+   $env:CLOUD_VOYAGE_MAPTILER_KEY = Read-Host '输入自己的 MapTiler API Key' -MaskInput
+   try {
+       .\build.ps1 -SdkRoot '<Android SDK 目录>' -JavaHome '<JDK 17 目录>' `
+         -KeyStore '<自己的签名库路径>' -PasswordFile '<签名密码文件路径>'
+   } finally {
+       Remove-Item Env:CLOUD_VOYAGE_MAPTILER_KEY -ErrorAction SilentlyContinue
+   }
+   ```
+
+4. 安装 `build/CloudVoyage.apk`，联网打开航图。出现 **MapTiler** 署名时，表示在线瓦片正在显示。网络不可用时，地图会显示内置离线底图。
+
+Key 会随你构建的 APK 分发，安装者共享相同的 MapTiler 用量。请保留地图上的署名。同一签名可覆盖升级。自己的签名和公开版签名通常不同，直接覆盖会失败。卸载公开版会清除该安装中的本地飞行记录。
 
 ## 代码与素材
 
