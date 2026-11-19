@@ -1,0 +1,4 @@
+<resources>
+    <item type="mipmap" name="ic_launcher">@drawable/launcher_legacy</item>
+    <color name="launcher_background">#171723</color>
+</resources>
